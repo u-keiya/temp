@@ -1,1 +1,0 @@
-&"C:\Program Files\draw.io\draw.io.exe" -xf svg -o output.drawio.svg input.drawio
