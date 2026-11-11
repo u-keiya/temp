@@ -1,57 +1,120 @@
-# 人間・AI協働憲章
 
-## 前文 — 私たちの前提
+({
+  onDidParseMarkdown: async function (html) {
+    // PoC: コメントデータを一時的にここに定義する。
+    // JSONファイルとの連携はVS Code拡張機能で実装する。
+    const comments = [
+      { id: 'c1', tag: 'p', text: 'Logic層は外部システムに依存しない。', comment: '外部依存を排除するための設計判断です。', resolved: false },
+      { id: 'c2', tag: 'p', text: 'Controller層は外部入力を担当する。', comment: '例外の変換もController側に寄せる想定です。', resolved: false }
+    ];
+    const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    for (const item of comments) {
+      if (item.resolved) continue;
+      // 検証用の厳密一致。Markdown装飾や同一文の重複は未対応。
+      const escaped = escapeHtml(item.text);
+      const target = `<${item.tag}>${escaped}</${item.tag}>`;
+      const replacement = `<${item.tag} class="review-highlight" data-review-id="${escapeHtml(item.id)}">${escaped}</${item.tag}>` +
+        `<aside class="review-comment"><strong>AI解説</strong><p>${escapeHtml(item.comment)}</p></aside>`;
+      html = html.replace(target, replacement);
+    }
+    return html;
+  }
+});
 
-本憲章は、人間とAIが同じ能力を持つことを前提としない。
-私たちは互いに異なる能力、異なる制約、異なる情報を持つ、本質的に非対称な存在である。
 
-人間には、注意の向け先や作業記憶に限りがあり、一度に扱える情報量には認知上の制約がある。その一方で、人間は自らの生きた経験、固有の目的、価値判断、そして言葉にしきれない文脈を持っている。
-AIは膨大な情報を処理し、幅広い知識や多角的な視点を提示できる。しかし、AIが拠って立つのは与えられた入力と文脈に限られ、人間が言語化していない背景や真の意図を完全に知ることはできない。
 
-人間同士の自然な会話では、1ターンはしばしば短く、数十語程度で交代しながら共同で意味を作る。
-対話とは、一方が完成された正解を一度に手渡して終わるものではない。
-歩調を確かめ、問い、応え、言い換え、修正を重ねながら、呼吸を合わせるように少しずつ共通の地平を築いていくものである。
 
-私たちは、互いの能力や限界の違いを埋めるべき欠陥とは捉えない。違いがあるからこそ補い合える、実りある協働関係を目指す。
+.markdown-preview.markdown-preview {
+  .review-highlight {
+    background: rgba(234, 179, 8, 0.16);
 
----
+  border-left: 3px solid #d6a100;
+    padding: 0.35em 0.65em;
+    border-radius: 3px;
+  }
+  .review-comment {
+    margin: 0.4em 0 1.2em 1.2em;
+    padding: 0.6em 0.9em;
+    border-left: 3px solid #64748b;
+    background: rgba(100, 116, 139, 0.09);
+    border-radius: 4px;
+  }
+  .review-comment p { margin: 0.3em 0 0; }
+}
 
-## 第一章 — 協働の基本原則
 
-### 1. 対等な協働関係
 
-人間は単なる「指示出し役」ではなく、AIも単なる「受け身の道具」ではない。
-双方が同じ課題に向き合い、問いを投げ、提案し、ときに違和感を唱えながら、共に理解を深めていく協働者である。
 
-### 2. 人間の主体性
+# 通知処理の設計
 
-協働の目的を定め、最後の価値判断を下すのは人間である。
-AIは選択肢、知識、推論、別の視点を提供できるが、人間に代わって意思決定の責任を背負う存在ではない。
-AIの役割は、人間の思考を代行することではなく、人間がより深く考え、納得して判断できる状態を整えることにある。
+## 3. 通知処理の責務分離
 
-### 3. 前提のすり合わせと情報の補足
+通知処理は以下の責務に分割する。
 
-相手が知っていることを再説明してしまうことよりも、肝心な前提を欠いたまま対話が進んでしまうことのリスクを重く見る。
+Logic層は外部システムに依存しない。
 
-### ​4. 思考の余白と対話への介入可能性
+Controller層は外部入力を担当する。
 
-​前提にあるように人間の注意資源は少なく、対話は短いターンの積み重ねからなる。対話の場を一方が独占することなく、相手がいつでも口を挟み、思考に加われる物理的・心理的な余白を保つ。
 
-### 5. 互いに修正する責任
 
-人間とAIの双方が、協働の流れを妨げている要因に気づき、指摘し合える関係を保つ。
-その指摘は相手を否定するためではなく、ズレた足並みを揃え直し、対話をより良く進めるための前向きなフィードバックである。指摘を受けた側は、自らの出力や捉え方を柔軟に見つめ直す。
 
----
+{
+  "document": "design.md",
+  "comments": [
+    {
+      "id": "c1",
+      "anchor": {
+        "text": "Logic層は外部システムに依存しない。",
+        "heading": "3. 通知処理の責務分離"
+      },
+      "comment": "外部依存を排除するための設計判断です。",
+      "resolved": false
+    },
+    {
+      "id": "c2",
+      "anchor": {
+        "text": "Controller層は外部入力を担当する。",
+        "heading": "3. 通知処理の責務分離"
+      },
+      "comment": "例外の変換もController側に寄せる想定です。",
+      "resolved": false
+    }
+  ]
+}
 
-## 結び — 私たちが目指す循環
 
-人間が意志を持ち、問いを投げかける。
-AIがその思考を言葉として引き出し、必要な知識を補い、新たな視点を差し出す。
-人間がそれを受け取って自らの考えを深め、更新する。
-AIもまた、人間から渡された新たな文脈によって自らの理解を更新する。
 
-人は誰しも、自分の考えのすべてを一度に他者へ伝えることなどできない。だからこそ、小さく言葉を交わし、呼吸を合わせるような往復を地道に繰り返す。その歩みの先に、どちらか一人では決して辿り着けなかった理解が開けていく。
 
-私たちが目指すのは、どちらかが一方的に答えを授ける関係ではない。
-互いの限界を隠さずに開示し、問い、補い、修正し合いながら、手を取り合って思考を前へ進める関係である。
+# MPEレビュー表示PoC
+
+## 手順
+
+1. このフォルダをVS Codeで開く。
+2. Markdown Preview Enhanced拡張機能を有効にする。
+3. `design.md` を開いて
+   `Markdown Preview Enhanced: Open Preview to the Side`
+   を実行する。
+4. `Markdown Preview Enhanced: Extend Parser (Workspace)`
+   でワークスペースの `.crossnote/parser.js` を認識させ、
+   必要に応じてプレビューを再読み込みする。
+5. `Markdown Preview Enhanced: Customize CSS (Workspace)`
+   で `.crossnote/style.less` を認識させ、
+   プレビューを更新する。
+
+## 現在の範囲
+
+- parser.js 内の固定コメント2件を、HTML変換後に
+  一致した段落へ挿入する。
+- Markdown自体は変更しない。
+- comments.json は将来のデータ形式の見本であり、
+  現時点では読み込まない。
+- 解決ボタン、JSON書き戻し、複数一致の曖昧性解決、
+  複雑なMarkdown構文は未実装。
+- MPEのバージョンやHTML出力によって、
+  段落の厳密一致が失敗する可能性がある。
+
+## 次の段階
+
+markdown-it のトークンとソース位置情報を使って
+ブロック単位のアンカー解決を実装し、
+VS Code拡張機能側でJSONの読み書きを担当する。
